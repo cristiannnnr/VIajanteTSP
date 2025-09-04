@@ -1,73 +1,121 @@
-# VIajanteTSP
 
-1. Definición de variables principales y estructura de la clase
+***
 
-   private:
-    int n; // Número de ciudades
-    vector<vector<double>> dist; // Matriz de distancias entre ciudades
-    vector<int> mejor_camino; // Arreglo que guarda la mejor ruta encontrada
-    double menor_costo; // Costo mínimo encontrado en la búsqueda
+# Problema del Viajante de Comercio (TSP) Fuerza Bruta
 
+EL programa en C++ resuelve el problema del viajante de comercio (TSP) para un conjunto pequeño de ciudades (máximo 10) utilizando un enfoque de fuerza bruta, probando todas las permutaciones posibles de rutas para encontrar el tour de costo mínimo.
 
-Esta sección define las variables que guardan el número de ciudades (n), la matriz de distancias entre todas las ciudades (dist), el mejor camino encontrado (mejor_camino) y el costo mínimo de ese camino (menor_costo). Estas variables forman la base de almacenamiento para la búsqueda y comparación de rutas[fragmento propio].
+## Descripción General
 
-2. Constructor para inicializar variables
-cpp
-Viajante::Viajante(const vector<vector<double>>& matriz_dist) {
-    dist = matriz_dist;
-    n = dist.size();
-    menor_costo = 1e9; // Inicializa con un valor muy alto
-}
-En el constructor, se recibe la matriz de distancias y se almacenan. También se toma el tamaño de la matriz para saber cuántas ciudades hay y se inicializa el menor_costo con un valor alto para que cualquier ruta válida sea considerada en el primer cálculo. Esto prepara el objeto para empezar la búsqueda[fragmento propio].
+El código genera aleatoriamente una matriz de distancias entre ciudades (que no es simétrica) y luego calcula exhaustivamente el costo de cada posible recorrido que comienza y termina en la ciudad 0. Al final muestra la secuencia de ciudades del tour mínimo y su costo total.
 
-3. Función recursiva para generar permutaciones de rutas
-cpp
-void Viajante::permutar(vector<int>& camino, int inicio) {
-    if (inicio == n - 1) {
-        double costo_actual = calcular_costo(camino);
-        if (costo_actual < menor_costo) {
-            menor_costo = costo_actual;
-            mejor_camino = camino;
-        }
-    } else {
-        for (int i = inicio; i < n; i++) {
-            swap(camino[inicio], camino[i]);
-            permutar(camino, inicio + 1);
-            swap(camino[inicio], camino[i]);
-        }
-    }
-}
-Esta función genera todas las permutaciones posibles del vector que contiene la ruta actual (camino). Cuando llega a una permutación completa (inicio == n - 1), calcula el costo total de esa ruta. Si el costo es inferior al mejor costo encontrado hasta el momento, actualiza las variables. Esta es la función que implementa la búsqueda exhaustiva (fuerza bruta) en el problema del viajante[fragmento propio].
+***
 
-4. Función para calcular el costo total de un camino
-cpp
-double Viajante::calcular_costo(const vector<int>& camino) {
-    double suma = 0;
+## Explicación de Funciones y Código
+
+### Cálculo del Costo Total del Tour
+
+```cpp
+int calcularCosto(const vector< vector<int> > &distancias, const vector<int> &tour) {
+    int costo = 0;
+    int n = tour.size();
     for (int i = 0; i < n - 1; i++) {
-        suma += dist[camino[i]][camino[i + 1]];
+        costo += distancias[tour[i]][tour[i + 1]];
     }
-    suma += dist[camino[n - 1]][camino[0]];
-    return suma;
+    costo += distancias[tour[n - 1]][tour[0]];
+    return costo;
 }
-Esta función suma las distancias entre ciudades consecutivas en la ruta y añade el regreso a la ciudad inicial para cerrar el ciclo. Devuelve la suma total de estas distancias, que es el costo de la ruta[fragmento propio].
+```
 
-5. Inicio de la búsqueda y configuración del vector de ruta
-cpp
-void Viajante::resolver() {
-    vector<int> camino(n);
-    for (int i = 0; i < n; i++) camino[i] = i;
-    permutar(camino, 0);
+- Esta función recibe la matriz de distancias y una secuencia (vector) que representa un tour.
+- Suma las distancias entre cada ciudad consecutiva en el tour.
+- Añade también la distancia de regreso desde la última ciudad a la ciudad inicial para cerrar el ciclo.
+- Devuelve el costo total del recorrido.
+
+***
+
+### Entrada y Validación del Número de Ciudades
+
+```cpp
+int n;
+cout << "Ingrese el numero de ciudades (n <= 10): ";
+cin >> n;
+if (n < 2 || n > 10) {
+    cout << "Error: el numero de ciudades debe estar entre 2 y 10." << endl;
+    return 0;
 }
-Aquí se inicializa el camino con la secuencia natural de ciudades (0 hasta n-1) y se comienza la búsqueda de permutaciones desde la posición 0. Es el disparador de la función recursiva para comprobar todas las rutas posibles[fragmento propio].
+```
 
-6. Impresión del mejor resultado encontrado
-cpp
-void Viajante::imprimir_resultados() {
-    cout << "Mejor ruta: ";
-    for (int i = 0; i < n; i++) {
-        cout << mejor_camino[i] << " ";
+- Se solicita al usuario ingresar el número de ciudades.
+- Se valida que el número esté entre 2 y 10, ya que el algoritmo de fuerza bruta es computacionalmente costoso para valores mayores.
+
+***
+
+### Generación de la Matriz de Distancias No Simétrica
+
+```cpp
+vector< vector<int> > distancias(n, vector<int>(n));
+for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+        if (i == j) {
+            distancias[i][j] = 0;
+        } else {
+            distancias[i][j] = (rand() % 50) + 10;
+        }
     }
-    cout << mejor_camino[0] << endl;
-    cout << "Costo minimo: " << menor_costo << endl;
 }
-Finalmente, se muestra en consola la mejor ruta encontrada y el costo mínimo para completar esa ruta[fragmento propio].
+```
+
+- Se crea una matriz cuadrada para distancias entre ciudades.
+- La diagonal es 0 porque la distancia de una ciudad a sí misma es 0.
+- Las demás distancias se generan aleatoriamente entre 10 y 59.
+- La matriz no es simétrica, lo que significa que la distancia de la ciudad i a j puede ser diferente de la distancia de j a i.
+
+***
+
+### Búsqueda Exhaustiva de la Mejor Ruta
+
+```cpp
+vector<int> ciudades;
+for (int i = 1; i < n; i++) {
+    ciudades.push_back(i);
+}
+int mejorCosto = numeric_limits<int>::max();
+vector<int> mejorTour;
+
+do {
+    vector<int> tour;
+    tour.push_back(0);
+    for (size_t i = 0; i < ciudades.size(); i++) {
+        tour.push_back(ciudades[i]);
+    }
+    int costo = calcularCosto(distancias, tour);
+    if (costo < mejorCosto) {
+        mejorCosto = costo;
+        mejorTour = tour;
+    }
+} while (next_permutation(ciudades.begin(), ciudades.end()));
+```
+
+- El vector `ciudades` contiene todas las ciudades salvo la ciudad 0, que se fija como punto de inicio y fin.
+- Se generan todas las permutaciones posibles de las ciudades con `next_permutation`.
+- Para cada permutación se calcula el costo del tour incluyendo la vuelta a la ciudad inicial.
+- Se guarda el tour con el costo mínimo encontrado.
+
+***
+
+### Resultado Final
+
+```cpp
+cout << "\nEl tour minimo es: ";
+for (size_t i = 0; i < mejorTour.size(); i++) {
+    cout << mejorTour[i] << " -> ";
+}
+cout << "0" << endl;
+cout << "Costo minimo: " << mejorCosto << endl;
+```
+
+- Se muestra la secuencia óptima de ciudades a visitar.
+- Se muestra el costo total mínimo del recorrido.
+
+***
