@@ -1,4 +1,8 @@
 
+Miguel Angel Torres Ramirez - 20222020130
+Cristian David Romero Gil - 20222020138
+
+
 ***
 
 # Problema del Viajante de Comercio (TSP) Fuerza Bruta
